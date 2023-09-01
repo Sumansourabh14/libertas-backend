@@ -1,0 +1,32 @@
+const express = require("express");
+const dotenv = require("dotenv").config();
+const app = express();
+const connectDb = require("./utils/connectDb");
+
+connectDb();
+
+// routes
+const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
+const errorHandler = require("./middlewares/errorMiddleware");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+
+const port = process.env.PORT || 7003;
+
+app.get("/", (req, res) => {
+  res.send("Libertas Backend Home Page");
+});
+
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use(errorHandler);
+
+app.listen(port, () => {
+  console.log(`listening on port ${port}`);
+});
