@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/UserModel");
+const PostModel = require("../models/PostModel");
 
 const signUpController = asyncHandler(async (req, res, next) => {
   const { name, username, email, password } = req.body;
@@ -90,10 +91,50 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   });
 });
 
+const createPost = asyncHandler(async (req, res, next) => {
+  const { title, body } = req.body;
+  console.log(req.user);
+
+  if (!title || !body.trim()) {
+    res.status(400);
+    return next(new Error("Please write title and body"));
+  }
+
+  const newPost = await PostModel.create({
+    post: {
+      title,
+      body,
+    },
+    userId: req.user._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    post: {
+      id: newPost._id,
+      userId: req.user._id,
+      title,
+      body,
+    },
+  });
+});
+
+const getPosts = asyncHandler(async (req, res, next) => {
+  const posts = await PostModel.find();
+
+  res.status(200).json({
+    success: true,
+    total: posts.length,
+    posts,
+  });
+});
+
 module.exports = {
   signUpController,
   getUsers,
   getUserDetails,
   deleteUser,
   updateUser,
+  createPost,
+  getPosts,
 };
