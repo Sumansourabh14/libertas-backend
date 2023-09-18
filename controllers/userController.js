@@ -50,6 +50,22 @@ const getUserDetails = (req, res) => {
   res.status(200).json({ success: true, user: req.user });
 };
 
+const getUser = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    res.status(400);
+    return next(new Error("User not found"));
+  }
+
+  res.json({
+    success: true,
+    user,
+  });
+});
+
 const updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
@@ -93,6 +109,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 module.exports = {
   signUpController,
   getUsers,
+  getUser,
   getUserDetails,
   deleteUser,
   updateUser,

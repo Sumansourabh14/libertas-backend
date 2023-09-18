@@ -7,7 +7,7 @@ const UserModel = require("../models/UserModel");
 // @access  Private
 const createPost = asyncHandler(async (req, res, next) => {
   const { title, body } = req.body;
-  console.log(req.user);
+  console.log("req.user: ", req.user);
 
   if (!title || !body.trim()) {
     res.status(400);
@@ -57,6 +57,37 @@ const getPosts = asyncHandler(async (req, res, next) => {
     total: posts.length,
     posts,
   });
+});
+
+// @desc    Get a post
+// @route   GET /api/user/post/:id
+// @access  Public
+const getPost = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  // check if user is present in the database
+  const post = await PostModel.findById(id);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  res.status(200).json({
+    success: true,
+    post,
+  });
+});
+
+// @desc    Get all the posts
+// @route   GET /api/user/posts
+// @access  Public
+const getAllPosts = asyncHandler(async (req, res, next) => {
+  const posts = await PostModel.find();
+
+  console.log("posts", posts);
+
+  res.status(200).json({ success: true, total: posts.length, data: posts });
 });
 
 // @desc    Delete a post
@@ -111,4 +142,11 @@ const deleteAllPosts = asyncHandler(async (req, res, next) => {
   });
 });
 
-module.exports = { createPost, getPosts, deletePost, deleteAllPosts };
+module.exports = {
+  createPost,
+  getPosts,
+  getPost,
+  getAllPosts,
+  deletePost,
+  deleteAllPosts,
+};
