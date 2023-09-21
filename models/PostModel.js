@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const postSchema = mongoose.Schema(
   {
-    userId: {
-      type: String,
+    author: {
+      // type: mongoose.Schema.Types.ObjectId,
+      type: Object,
     },
     post: {
       title: {

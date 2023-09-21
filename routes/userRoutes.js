@@ -38,6 +38,6 @@ router.get("/posts/:id", authMiddleware, getPosts);
 router.get("/post/:id", getPost);
 
 router.delete("/post/:id", authMiddleware, deletePost);
-router.delete("/posts/:id", authMiddleware, deleteAllPosts);
+router.delete("/posts/:id", deleteAllPosts);
 
 module.exports = router;

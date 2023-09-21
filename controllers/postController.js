@@ -19,7 +19,8 @@ const createPost = asyncHandler(async (req, res, next) => {
       title,
       body,
     },
-    userId: req.user._id,
+    // userId: req.user._id,
+    author: req.user,
   });
 
   res.status(201).json({
@@ -41,6 +42,7 @@ const getPosts = asyncHandler(async (req, res, next) => {
 
   // check if user is present in the database
   const user = await UserModel.findById(id);
+  console.log(user);
 
   if (!user) {
     res.status(400);
@@ -48,7 +50,8 @@ const getPosts = asyncHandler(async (req, res, next) => {
   }
 
   // find all the posts created by the user
-  const posts = await PostModel.find({ userId: id });
+  const posts = await PostModel.find({ author: user });
+  // const posts = await PostModel.find({ userId: id });
 
   console.log(posts);
 
