@@ -83,20 +83,32 @@ const upvotePost = asyncHandler(async (req, res, next) => {
   }
 
   if (!post.upvotes.includes(req.user._id)) {
-    console.log("ran");
+    // add the upvote
     await PostModel.updateOne(
       { _id: id },
       { $push: { upvotes: req.user._id } }
     );
   } else {
+    // remove the upvote
+    await PostModel.updateOne(
+      { _id: id },
+      { $pull: { upvotes: req.user._id } }
+    );
+
     res.status(403);
-    return next(new Error("You have already upvoted the post"));
+    return next(
+      new Error("You have already upvoted the post, so removing your upvote.")
+    );
   }
+
+  // Fetch the updated post after the upvote
+  const updatedPost = await PostModel.findById(id);
+  console.log(updatedPost);
 
   res.status(200).json({
     success: true,
     message: `You upvoted the post with id: ${id}`,
-    post,
+    updatedPost,
   });
 });
 
