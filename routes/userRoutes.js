@@ -18,6 +18,8 @@ const {
   deleteAllPosts,
   getAllPosts,
   getPost,
+  upvotePost,
+  updatePost,
 } = require("../controllers/postController");
 
 router.post("/sign-up", signUpController);
@@ -32,6 +34,9 @@ router.delete("/user/:id", authMiddleware, deleteUser);
 
 // posts
 router.post("/create-post", authMiddleware, createPost);
+router.put("/edit-post/:id", authMiddleware, updatePost);
+
+router.post("/post/upvote/:id", authMiddleware, upvotePost);
 
 router.get("/submitted/posts", getAllPosts);
 router.get("/posts/:id", authMiddleware, getPosts);

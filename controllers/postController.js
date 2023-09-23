@@ -19,18 +19,84 @@ const createPost = asyncHandler(async (req, res, next) => {
       title,
       body,
     },
-    // userId: req.user._id,
+    upvotes: [],
     author: req.user,
   });
 
   res.status(201).json({
     success: true,
-    post: {
-      id: newPost._id,
-      userId: req.user._id,
-      title,
-      body,
-    },
+    newPost,
+  });
+});
+
+// @desc    update a post
+// @route   PUT /api/user/edit-post/:id
+// @access  Private
+const updatePost = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { title, body } = req.body;
+
+  if (!title || !body.trim()) {
+    res.status(400);
+    return next(new Error("Please write title and body"));
+  }
+
+  const findPost = await PostModel.findById(id);
+  console.log("findPost ----------------", findPost);
+
+  if (!findPost) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  if (!findPost.author._id.equals(req.user._id)) {
+    res.status(403);
+    return next(new Error("You can only edit your post"));
+  }
+
+  const updatedPost = await PostModel.updateOne(
+    { _id: id },
+    { $set: { "post.title": title, "post.body": body } }
+  );
+  console.log(updatedPost);
+
+  res.status(201).json({
+    success: true,
+    message: "Your post has been updated",
+    newPost: updatedPost,
+  });
+});
+
+// @desc    upvote a post
+// @route   POST /api/post/upvote/:id
+// @access  Private
+const upvotePost = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const post = await PostModel.findById(id);
+
+  console.log(post);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  if (!post.upvotes.includes(req.user._id)) {
+    console.log("ran");
+    await PostModel.updateOne(
+      { _id: id },
+      { $push: { upvotes: req.user._id } }
+    );
+  } else {
+    res.status(403);
+    return next(new Error("You have already upvoted the post"));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `You upvoted the post with id: ${id}`,
+    post,
   });
 });
 
@@ -146,10 +212,12 @@ const deleteAllPosts = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
-  createPost,
-  getPosts,
   getPost,
-  getAllPosts,
+  createPost,
+  updatePost,
   deletePost,
+  upvotePost,
+  getPosts,
+  getAllPosts,
   deleteAllPosts,
 };

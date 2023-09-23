@@ -16,6 +16,10 @@ const postSchema = mongoose.Schema(
         required: true,
       },
     },
+    upvotes: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,
