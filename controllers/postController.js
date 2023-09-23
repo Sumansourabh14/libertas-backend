@@ -20,6 +20,7 @@ const createPost = asyncHandler(async (req, res, next) => {
       body,
     },
     upvotes: [],
+    downvotes: [],
     author: req.user,
   });
 
@@ -108,6 +109,53 @@ const upvotePost = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `You upvoted the post with id: ${id}`,
+    updatedPost,
+  });
+});
+
+// @desc    downvote a post
+// @route   POST /api/post/downvote/:id
+// @access  Private
+const downvotePost = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const post = await PostModel.findById(id);
+
+  console.log(post);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  if (!post.upvotes.includes(req.user._id)) {
+    // add the downvote
+    await PostModel.updateOne(
+      { _id: id },
+      { $push: { downvotes: req.user._id } }
+    );
+  } else {
+    // remove the downvote
+    await PostModel.updateOne(
+      { _id: id },
+      { $pull: { downvotes: req.user._id } }
+    );
+
+    res.status(403);
+    return next(
+      new Error(
+        "You have already downvoted the post, so removing your downvote."
+      )
+    );
+  }
+
+  // Fetch the updated post after the downvote
+  const updatedPost = await PostModel.findById(id);
+  console.log(updatedPost);
+
+  res.status(200).json({
+    success: true,
+    message: `You downvoted the post with id: ${id}`,
     updatedPost,
   });
 });
@@ -229,6 +277,7 @@ module.exports = {
   updatePost,
   deletePost,
   upvotePost,
+  downvotePost,
   getPosts,
   getAllPosts,
   deleteAllPosts,

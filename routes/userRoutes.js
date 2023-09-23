@@ -20,6 +20,7 @@ const {
   getPost,
   upvotePost,
   updatePost,
+  downvotePost,
 } = require("../controllers/postController");
 
 router.post("/sign-up", signUpController);
@@ -37,6 +38,7 @@ router.post("/create-post", authMiddleware, createPost);
 router.put("/edit-post/:id", authMiddleware, updatePost);
 
 router.post("/post/upvote/:id", authMiddleware, upvotePost);
+router.post("/post/downvote/:id", authMiddleware, downvotePost);
 
 router.get("/submitted/posts", getAllPosts);
 router.get("/posts/:id", authMiddleware, getPosts);

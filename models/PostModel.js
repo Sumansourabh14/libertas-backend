@@ -20,6 +20,10 @@ const postSchema = mongoose.Schema(
       type: Array,
       default: [],
     },
+    downvotes: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,
