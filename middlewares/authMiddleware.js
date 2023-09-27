@@ -5,7 +5,7 @@ const UserModel = require("../models/UserModel");
 
 const authMiddlware = asyncHandler(async (req, res, next) => {
   const { token } = req.cookies;
-  console.log(token);
+  console.log({ token });
 
   if (!token) {
     res.status(401);

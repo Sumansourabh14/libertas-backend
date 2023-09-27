@@ -76,8 +76,6 @@ const upvotePost = asyncHandler(async (req, res, next) => {
 
   const post = await PostModel.findById(id);
 
-  console.log(post);
-
   if (!post) {
     res.status(400);
     return next(new Error("Post not found"));
@@ -121,20 +119,19 @@ const downvotePost = asyncHandler(async (req, res, next) => {
 
   const post = await PostModel.findById(id);
 
-  console.log(post);
-
   if (!post) {
     res.status(400);
     return next(new Error("Post not found"));
   }
 
-  if (!post.upvotes.includes(req.user._id)) {
+  if (!post.downvotes.includes(req.user._id)) {
     // add the downvote
     await PostModel.updateOne(
       { _id: id },
       { $push: { downvotes: req.user._id } }
     );
   } else {
+    console.log("post after downvote", post);
     // remove the downvote
     await PostModel.updateOne(
       { _id: id },
@@ -151,7 +148,7 @@ const downvotePost = asyncHandler(async (req, res, next) => {
 
   // Fetch the updated post after the downvote
   const updatedPost = await PostModel.findById(id);
-  console.log(updatedPost);
+  console.log("updatedPost ---------", updatedPost);
 
   res.status(200).json({
     success: true,
@@ -214,7 +211,7 @@ const getPost = asyncHandler(async (req, res, next) => {
 const getAllPosts = asyncHandler(async (req, res, next) => {
   const posts = await PostModel.find();
 
-  console.log("posts", posts);
+  // console.log("posts", posts);
 
   res.status(200).json({ success: true, total: posts.length, data: posts });
 });
