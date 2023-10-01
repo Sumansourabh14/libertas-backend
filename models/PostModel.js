@@ -16,6 +16,13 @@ const postSchema = mongoose.Schema(
         required: true,
       },
     },
+    // need to create comments schema in order to remove any comment
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     upvotes: {
       type: Array,
       default: [],

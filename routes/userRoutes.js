@@ -21,6 +21,9 @@ const {
   upvotePost,
   updatePost,
   downvotePost,
+  addComment,
+  deleteComment,
+  getComments,
 } = require("../controllers/postController");
 
 router.post("/sign-up", signUpController);
@@ -39,6 +42,11 @@ router.put("/edit-post/:id", authMiddleware, updatePost);
 
 router.post("/post/upvote/:id", authMiddleware, upvotePost);
 router.post("/post/downvote/:id", authMiddleware, downvotePost);
+
+// comments
+router.post("/post/comment/:id", authMiddleware, addComment);
+router.get("/post/comments/:postId", getComments);
+router.delete("/post/comment/:postId", authMiddleware, deleteComment);
 
 router.get("/submitted/posts", getAllPosts);
 router.get("/posts/:id", authMiddleware, getPosts);

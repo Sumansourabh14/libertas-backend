@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const PostModel = require("../models/PostModel");
 const UserModel = require("../models/UserModel");
+const CommentModel = require("../models/CommentModel");
 
 // @desc    create a post
 // @route   POST /api/user/create-post
@@ -157,6 +158,99 @@ const downvotePost = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    add a comment
+// @route   POST /api/post/comment/:id
+// @access  Private
+const addComment = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { body } = req.body;
+
+  if (!body.trim()) {
+    res.status(400);
+    return next(new Error("Please write the body"));
+  }
+
+  const post = await PostModel.findById(id);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  const newComment = new CommentModel({
+    body,
+    author: req.user._id,
+    postId: id,
+  });
+
+  await CommentModel.create(newComment);
+
+  await PostModel.updateOne({ _id: id }, { $push: { comments: newComment } });
+
+  res.status(200).json({
+    success: true,
+    message: `Comment added successfully for post: ${id}`,
+    comment: newComment,
+  });
+});
+
+// @desc    get comments of a certain post
+// @route   GET /api/post/comments/:postId
+// @access  Public
+const getComments = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+
+  const post = await PostModel.findById(postId);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  const comments = await CommentModel.find({ postId: postId });
+
+  res.status(200).json({
+    success: true,
+    data: comments,
+  });
+});
+
+// @desc    delete a comment
+// @route   DELETE /api/post/comment/:id
+// @access  Private
+const deleteComment = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+  const { commentId } = req.body;
+
+  if (!commentId) {
+    res.status(400);
+    return next(new Error("Please provide comment id"));
+  }
+
+  const post = await PostModel.findById(postId);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  await CommentModel.findByIdAndRemove(commentId);
+
+  await PostModel.updateOne(
+    { _id: postId },
+    { $pull: { comments: commentId } }
+  );
+
+  const updatedPost = await PostModel.findById(postId);
+  console.log("updatedPost -------------", updatedPost);
+
+  res.status(200).json({
+    success: true,
+    message: `Comment has been successfully deleted!`,
+    updatedPost,
+  });
+});
+
 // @desc    Get posts
 // @route   POST /api/user/posts
 // @access  Private
@@ -274,6 +368,9 @@ module.exports = {
   updatePost,
   deletePost,
   upvotePost,
+  addComment,
+  getComments,
+  deleteComment,
   downvotePost,
   getPosts,
   getAllPosts,
