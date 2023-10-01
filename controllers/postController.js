@@ -234,6 +234,13 @@ const deleteComment = asyncHandler(async (req, res, next) => {
     return next(new Error("Post not found"));
   }
 
+  const findComment = await CommentModel.findOne({ _id: commentId });
+
+  if (!findComment) {
+    res.status(400);
+    return next(new Error("Comment not found"));
+  }
+
   await CommentModel.findByIdAndRemove(commentId);
 
   await PostModel.updateOne(

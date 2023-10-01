@@ -37,22 +37,22 @@ router.put("/user/:id", authMiddleware, updateUser);
 router.delete("/user/:id", authMiddleware, deleteUser);
 
 // posts
+router.get("/post/:id", getPost);
 router.post("/create-post", authMiddleware, createPost);
 router.put("/edit-post/:id", authMiddleware, updatePost);
+router.delete("/post/:id", authMiddleware, deletePost);
 
+router.get("/posts/:id", authMiddleware, getPosts);
+router.get("/submitted/posts", getAllPosts);
+router.delete("/posts/:id", deleteAllPosts);
+
+// upvote/downvote post
 router.post("/post/upvote/:id", authMiddleware, upvotePost);
 router.post("/post/downvote/:id", authMiddleware, downvotePost);
 
 // comments
-router.post("/post/comment/:id", authMiddleware, addComment);
 router.get("/post/comments/:postId", getComments);
+router.post("/post/comment/:id", authMiddleware, addComment);
 router.delete("/post/comment/:postId", authMiddleware, deleteComment);
-
-router.get("/submitted/posts", getAllPosts);
-router.get("/posts/:id", authMiddleware, getPosts);
-router.get("/post/:id", getPost);
-
-router.delete("/post/:id", authMiddleware, deletePost);
-router.delete("/posts/:id", deleteAllPosts);
 
 module.exports = router;
