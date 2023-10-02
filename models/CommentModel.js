@@ -10,6 +10,14 @@ const commentSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       // type: Object,
     },
+    upvotes: {
+      type: Array,
+      default: [],
+    },
+    downvotes: {
+      type: Array,
+      default: [],
+    },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
     },

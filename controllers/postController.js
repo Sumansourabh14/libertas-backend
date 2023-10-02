@@ -7,7 +7,7 @@ const CommentModel = require("../models/CommentModel");
 // @route   POST /api/user/create-post
 // @access  Private
 const createPost = asyncHandler(async (req, res, next) => {
-  const { title, body } = req.body;
+  const { title, body, imageUrl } = req.body;
   console.log("req.user: ", req.user);
 
   if (!title || !body.trim()) {
@@ -19,6 +19,7 @@ const createPost = asyncHandler(async (req, res, next) => {
     post: {
       title,
       body,
+      imageUrl,
     },
     upvotes: [],
     downvotes: [],
@@ -258,6 +259,59 @@ const deleteComment = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    upvote a comment
+// @route   POST /api/post/comment/upvote/:id
+// @access  Private
+const upvoteComment = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+  const { commentId } = req.body;
+
+  if (!commentId) {
+    res.status(400);
+    return next(new Error("Please provide comment id"));
+  }
+
+  const post = await PostModel.findById(postId);
+
+  if (!post) {
+    res.status(400);
+    return next(new Error("Post not found"));
+  }
+
+  const findComment = await CommentModel.findOne({ _id: commentId });
+
+  if (!findComment) {
+    res.status(400);
+    return next(new Error("Comment not found"));
+  }
+
+  if (!findComment.upvotes.includes(req.user._id)) {
+    await CommentModel.updateOne(
+      { _id: id },
+      { $push: { upvotes: req.user._id } }
+    );
+  } else {
+    await CommentModel.updateOne(
+      { _id: id },
+      { $pull: { upvotes: req.user._id } }
+    );
+    res.status(400);
+    return next(
+      new Error("Already upvoted the comment, so taking down your upvote")
+    );
+  }
+
+  // Fetch the updated comment after the upvote
+  const updatedComment = await CommentModel.findById(commentId);
+  console.log("updatedComment ------------------------", updatedComment);
+
+  res.status(200).json({
+    success: true,
+    message: `You have successfully upvoted the comment`,
+    commentId,
+  });
+});
+
 // @desc    Get posts
 // @route   POST /api/user/posts
 // @access  Private
@@ -378,6 +432,7 @@ module.exports = {
   addComment,
   getComments,
   deleteComment,
+  upvoteComment,
   downvotePost,
   getPosts,
   getAllPosts,

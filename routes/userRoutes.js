@@ -53,6 +53,6 @@ router.post("/post/downvote/:id", authMiddleware, downvotePost);
 // comments
 router.get("/post/comments/:postId", getComments);
 router.post("/post/comment/:id", authMiddleware, addComment);
-router.delete("/post/comment/:postId", authMiddleware, deleteComment);
+router.put("/post/comment/:postId", authMiddleware, deleteComment);
 
 module.exports = router;
