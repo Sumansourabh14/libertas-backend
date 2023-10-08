@@ -5,7 +5,8 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDb = require("./utils/connectDb");
-
+const multer = require("multer");
+const forms = multer();
 connectDb();
 
 // routes
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.use(express.json());
+app.use(forms.array());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

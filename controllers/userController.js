@@ -68,6 +68,9 @@ const getUser = asyncHandler(async (req, res, next) => {
 
 const updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
+  console.log("req.body -------------------", req.body);
+
+  const { bio, twitter, website } = req.body;
 
   const user = await UserModel.findById(id);
 
@@ -76,9 +79,17 @@ const updateUser = asyncHandler(async (req, res, next) => {
     return next(new Error("User not found"));
   }
 
-  const updateUser = await UserModel.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
+  let updateUser = {};
+
+  if (
+    bio !== "undefined" ||
+    twitter !== "undefined" ||
+    website !== "undefined"
+  ) {
+    updateUser = await UserModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+  }
 
   res.json({
     success: true,
