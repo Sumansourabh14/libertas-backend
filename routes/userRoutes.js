@@ -9,6 +9,7 @@ const {
   deleteUser,
   updateUser,
   getUser,
+  isUsernameAvailableController,
 } = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const {
@@ -27,6 +28,7 @@ const {
 } = require("../controllers/postController");
 
 router.post("/sign-up", signUpController);
+router.post("/check-username", isUsernameAvailableController);
 
 router.get("/users", getUsers);
 router.get("/user", authMiddleware, getUserDetails);

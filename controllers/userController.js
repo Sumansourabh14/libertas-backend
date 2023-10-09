@@ -11,12 +11,20 @@ const signUpController = asyncHandler(async (req, res, next) => {
     return next(new Error("All fields are required"));
   }
 
-  // Check if user already exists
+  // Check if user already exists (by email)
   const userAvailable = await UserModel.findOne({ email });
 
   if (userAvailable) {
     res.status(400);
     return next(new Error("User is already registered!"));
+  }
+
+  // Check if username already exists
+  const usernameIsPresent = await UserModel.findOne({ username: username });
+
+  if (usernameIsPresent) {
+    res.status(400);
+    return next(new Error("Username is NOT available!"));
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -63,6 +71,28 @@ const signUpController = asyncHandler(async (req, res, next) => {
     res.status(400);
     return next(new Error("User data is not valid"));
   }
+});
+
+const isUsernameAvailableController = asyncHandler(async (req, res, next) => {
+  const { username } = req.body;
+
+  if (!username) {
+    res.status(400);
+    return next(new Error("Username is not filled!"));
+  }
+
+  // Check if username already exists
+  const userIsPresent = await UserModel.findOne({ username: username });
+
+  if (userIsPresent) {
+    res.status(400);
+    return next(new Error("Oops! Username is not available!"));
+  }
+
+  res.status(201).json({
+    success: true,
+    message: "Username is available!",
+  });
 });
 
 const getUsers = asyncHandler(async (req, res, next) => {
@@ -144,6 +174,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 
 module.exports = {
   signUpController,
+  isUsernameAvailableController,
   getUsers,
   getUser,
   getUserDetails,
