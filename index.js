@@ -16,12 +16,12 @@ const errorHandler = require("./middlewares/errorMiddleware");
 
 const port = process.env.PORT || 7003;
 
-app.get("/", (req, res) => {
-  res.send("Libertas Backend Home Page");
+app.get("/", async (req, res) => {
+  res.json({ message: "Home page" });
 });
 
 app.use(express.json());
-app.use(forms.array());
+app.use(forms.array()); // read multipart form data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

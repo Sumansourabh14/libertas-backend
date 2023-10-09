@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserModel = require("../models/UserModel");
+const nodemailer = require("nodemailer");
 
 const loginController = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -26,6 +27,27 @@ const loginController = asyncHandler(async (req, res, next) => {
       { expiresIn: "1d" }
     );
 
+    // sending email with nodemailer
+    const loginHtml = `
+      <p>Hi, ${user.name},</p>
+      <p>You have successfully logged in to Libertas!</p>
+    `;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GOOGLE_ACCOUNT_USER,
+        pass: process.env.GOOGLE_ACCOUNT_PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
+      to: user.email, // list of receivers
+      subject: "New login to Libertas", // Subject line
+      html: loginHtml, // html body
+    });
+
     res
       .status(200)
       .cookie("token", accessToken, {
@@ -38,6 +60,7 @@ const loginController = asyncHandler(async (req, res, next) => {
         success: true,
         message: "User logged in successfully",
         accessToken,
+        emailInfo: info,
       });
   } else {
     res.status(400);

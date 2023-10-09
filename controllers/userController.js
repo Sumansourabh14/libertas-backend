@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/UserModel");
+const nodemailer = require("nodemailer");
 
 const signUpController = asyncHandler(async (req, res, next) => {
   const { name, username, email, password } = req.body;
@@ -27,12 +28,36 @@ const signUpController = asyncHandler(async (req, res, next) => {
     password: hashedPassword,
   });
 
+  const signUpHtml = `
+    <p>Hi, ${user.name},</p>
+    <p>You have successfully signed up on <strong>Libertas</strong> and ready to get started!</p>
+    <p><strong>Username:<strong> ${user.username}</p>
+    <a href="${process.env.FRONTEND_URI}/login">Login here</a>
+  `;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GOOGLE_ACCOUNT_USER,
+      pass: process.env.GOOGLE_ACCOUNT_PASS,
+    },
+  });
+
   if (user) {
+    // sending email with nodemailer
+    const info = await transporter.sendMail({
+      from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
+      to: user.email,
+      subject: `Welcome to Libertas, ${user.name}!`, // Subject line
+      html: signUpHtml, // html body
+    });
+
     res.status(201).json({
       success: true,
       message: "User has been added to the database!",
       id: user._id,
       email: user.email,
+      info: info,
     });
   } else {
     res.status(400);
