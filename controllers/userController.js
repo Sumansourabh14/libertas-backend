@@ -40,7 +40,7 @@ const signUpController = asyncHandler(async (req, res, next) => {
     <p>Hi, ${user.name},</p>
     <p>You have successfully signed up on <strong>Libertas</strong> and ready to get started!</p>
     <p><strong>Username:<strong> ${user.username}</p>
-    <a href="${process.env.FRONTEND_URI}/login">Login here</a>
+    <a href="https://libertas-vert.vercel.app/login">Login here</a>
   `;
 
   const transporter = nodemailer.createTransport({
@@ -95,6 +95,103 @@ const isUsernameAvailableController = asyncHandler(async (req, res, next) => {
   });
 });
 
+const sendPasswordRecoveryEmail = asyncHandler(async (req, res, next) => {
+  const { emailOrUsername } = req.body;
+
+  if (!emailOrUsername) {
+    res.status(400);
+    return next(new Error("Field is required"));
+  }
+
+  // Find the user
+  let userAvailable;
+  if (emailOrUsername.includes("@")) {
+    userAvailable = await UserModel.findOne({ email: emailOrUsername });
+  } else {
+    userAvailable = await UserModel.findOne({ username: emailOrUsername });
+  }
+
+  if (!userAvailable) {
+    res.status(400);
+    return next(new Error("User is not found"));
+  }
+
+  // const html = `
+  //   <p>Hi, ${userAvailable.name},</p>
+  //   <p>Here's your password recovery link</p>
+  //   <a href="https://localhost:7002/reset-password">Reset password here</a>
+  //   <p>Best regards, Libertas</p>
+  // `;
+
+  const html = `
+    <p>Hi, ${userAvailable.name},</p>
+    <p>Here's your password recovery link</p>
+    <a href="http://localhost:7002/reset-password/${userAvailable._id}">Reset password here</a>
+    <p>Best regards, Libertas</p>
+  `;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GOOGLE_ACCOUNT_USER,
+      pass: process.env.GOOGLE_ACCOUNT_PASS,
+    },
+  });
+
+  if (userAvailable) {
+    // sending email with nodemailer
+    const info = await transporter.sendMail({
+      from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
+      to: userAvailable.email,
+      subject: `Reset your Libertas password`, // Subject line
+      html: html, // html body
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Password recovery email has been sent succesfully",
+      id: userAvailable._id,
+      email: userAvailable.email,
+      info: info,
+    });
+  } else {
+    res.status(400);
+    return next(new Error("Something went wrong!"));
+  }
+});
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const { id, password, confirmPassword } = req.body;
+
+  if (!password || !confirmPassword) {
+    res.status(400);
+    return next(new Error("Both password fields are required"));
+  }
+
+  // Find the user
+  if (password !== confirmPassword) {
+    res.status(400);
+    return next(new Error("Passwords do not match"));
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const updateUser = UserModel.findByIdAndUpdate(id, {
+    password: hashedPassword,
+  });
+
+  if (updateUser) {
+    res.status(201).json({
+      success: true,
+      message: "Password has been reset succesfully",
+      user: updateUser._id,
+    });
+  } else {
+    res.status(400);
+    return next(new Error("Something went wrong!"));
+  }
+});
+
 const getUsers = asyncHandler(async (req, res, next) => {
   const users = await UserModel.find();
 
@@ -109,6 +206,34 @@ const getUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const user = await UserModel.findById(id);
+
+  if (!user) {
+    res.status(400);
+    return next(new Error("User not found"));
+  }
+
+  res.json({
+    success: true,
+    user,
+  });
+});
+
+const getUserByEmailOrUsername = asyncHandler(async (req, res, next) => {
+  const { emailOrUsername } = req.params;
+  console.log("emailOrUsername: ", emailOrUsername);
+
+  if (!emailOrUsername) {
+    res.status(400);
+    return next(new Error("Field is required"));
+  }
+
+  let user = {};
+
+  if (emailOrUsername.includes("@")) {
+    user = await UserModel.findOne({ email: emailOrUsername });
+  } else {
+    user = await UserModel.findOne({ username: emailOrUsername });
+  }
 
   if (!user) {
     res.status(400);
@@ -175,8 +300,11 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 module.exports = {
   signUpController,
   isUsernameAvailableController,
+  sendPasswordRecoveryEmail,
+  resetPassword,
   getUsers,
   getUser,
+  getUserByEmailOrUsername,
   getUserDetails,
   deleteUser,
   updateUser,

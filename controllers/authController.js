@@ -14,6 +14,8 @@ const loginController = asyncHandler(async (req, res, next) => {
 
   const user = await UserModel.findOne({ email });
 
+  console.log(password, user.password);
+
   if (user && (await bcrypt.compare(password, user.password))) {
     const accessToken = jwt.sign(
       {

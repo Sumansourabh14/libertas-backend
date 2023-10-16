@@ -10,6 +10,9 @@ const {
   updateUser,
   getUser,
   isUsernameAvailableController,
+  sendPasswordRecoveryEmail,
+  getUserByEmailOrUsername,
+  resetPassword,
 } = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const {
@@ -29,10 +32,13 @@ const {
 
 router.post("/sign-up", signUpController);
 router.post("/check-username", isUsernameAvailableController);
+router.post("/recover-password-email", sendPasswordRecoveryEmail);
+router.put("/reset-password", resetPassword);
 
 router.get("/users", getUsers);
 router.get("/user", authMiddleware, getUserDetails);
 router.get("/:id", getUser);
+router.get("/email-or-username/:emailOrUsername", getUserByEmailOrUsername);
 
 router.put("/user/:id", authMiddleware, updateUser);
 
