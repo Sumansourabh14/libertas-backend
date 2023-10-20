@@ -176,9 +176,15 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const updateUser = UserModel.findByIdAndUpdate(id, {
-    password: hashedPassword,
-  });
+  const updateUser = await UserModel.findByIdAndUpdate(
+    id,
+    {
+      password: hashedPassword,
+    },
+    {
+      new: true,
+    }
+  );
 
   if (updateUser) {
     res.status(201).json({
