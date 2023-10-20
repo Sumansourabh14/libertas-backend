@@ -119,14 +119,14 @@ const sendPasswordRecoveryEmail = asyncHandler(async (req, res, next) => {
   // const html = `
   //   <p>Hi, ${userAvailable.name},</p>
   //   <p>Here's your password recovery link</p>
-  //   <a href="https://localhost:7002/reset-password">Reset password here</a>
+  //   <a href="https://localhost:7002/reset-password/${userAvailable._id}">Reset password here</a>
   //   <p>Best regards, Libertas</p>
   // `;
 
   const html = `
     <p>Hi, ${userAvailable.name},</p>
     <p>Here's your password recovery link</p>
-    <a href="http://localhost:7002/reset-password/${userAvailable._id}">Reset password here</a>
+    <a href="https://libertas-vert.vercel.app/reset-password/${userAvailable._id}">Reset password here</a>
     <p>Best regards, Libertas</p>
   `;
 
