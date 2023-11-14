@@ -10,9 +10,9 @@ const createPost = asyncHandler(async (req, res, next) => {
   const { title, body, imageUrl } = req.body;
   console.log("req.user: ", req.user);
 
-  if (!title || !body.trim()) {
+  if (!title) {
     res.status(400);
-    return next(new Error("Please write title and body"));
+    return next(new Error("Please write title"));
   }
 
   const newPost = await PostModel.create({

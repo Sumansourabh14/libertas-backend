@@ -256,7 +256,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   console.log("req.body -------------------", req.body);
 
-  const { bio, twitter, website } = req.body;
+  const { bio, twitter, website, avatar } = req.body;
 
   const user = await UserModel.findById(id);
 
@@ -270,7 +270,8 @@ const updateUser = asyncHandler(async (req, res, next) => {
   if (
     bio !== "undefined" ||
     twitter !== "undefined" ||
-    website !== "undefined"
+    website !== "undefined" ||
+    avatar !== "undefined"
   ) {
     updateUser = await UserModel.findByIdAndUpdate(id, req.body, {
       new: true,
