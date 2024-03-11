@@ -364,11 +364,17 @@ const getPost = asyncHandler(async (req, res, next) => {
 // @route   GET /api/user/posts
 // @access  Public
 const getAllPosts = asyncHandler(async (req, res, next) => {
+  const { count } = req.query;
+
   const posts = await PostModel.find();
+  const postsToDisplay = posts.reverse().slice(0, count);
 
-  // console.log("posts", posts);
-
-  res.status(200).json({ success: true, total: posts.length, data: posts });
+  res.status(200).json({
+    success: true,
+    total: posts.length,
+    currentLength: postsToDisplay.length,
+    data: postsToDisplay,
+  });
 });
 
 // @desc    Delete a post
