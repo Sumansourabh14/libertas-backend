@@ -8,7 +8,6 @@ const CommentModel = require("../models/CommentModel");
 // @access  Private
 const createPost = asyncHandler(async (req, res, next) => {
   const { title, body, imageUrl } = req.body;
-  console.log("req.user: ", req.user);
 
   if (!title) {
     res.status(400);
@@ -39,13 +38,12 @@ const updatePost = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { title, body } = req.body;
 
-  if (!title || !body.trim()) {
+  if (!title) {
     res.status(400);
-    return next(new Error("Please write title and body"));
+    return next(new Error("Please write a title for your post"));
   }
 
   const findPost = await PostModel.findById(id);
-  console.log("findPost ----------------", findPost);
 
   if (!findPost) {
     res.status(400);
@@ -61,7 +59,6 @@ const updatePost = asyncHandler(async (req, res, next) => {
     { _id: id },
     { $set: { "post.title": title, "post.body": body } }
   );
-  console.log(updatedPost);
 
   res.status(201).json({
     success: true,
