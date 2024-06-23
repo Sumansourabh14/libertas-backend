@@ -426,6 +426,41 @@ const deleteAllPosts = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Search all the posts
+// @route   GET /api/posts/search?query=
+// @access  Public
+const searchAllPosts = asyncHandler(async (req, res, next) => {
+  const { query } = req.query;
+
+  if (!query) {
+    res.status(400);
+    return next(new Error("Please provide a search query."));
+  }
+
+  const posts = await PostModel.find({
+    $or: [
+      { "post.title": { $regex: query, $options: "i" } },
+      { "post.body": { $regex: query, $options: "i" } },
+    ],
+  });
+  const postsToDisplay = posts.reverse();
+
+  if (posts.length > 0) {
+    res.status(200).json({
+      success: true,
+      total: posts.length,
+      currentLength: postsToDisplay.length,
+      data: postsToDisplay,
+    });
+  } else {
+    res.status(200).json({
+      success: false,
+      total: posts.length,
+      message: "No result found",
+    });
+  }
+});
+
 module.exports = {
   getPost,
   createPost,
@@ -440,4 +475,5 @@ module.exports = {
   getPosts,
   getAllPosts,
   deleteAllPosts,
+  searchAllPosts,
 };

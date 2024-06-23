@@ -12,6 +12,7 @@ connectDb();
 // routes
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const postRoutes = require("./routes/postRoutes");
 const errorHandler = require("./middlewares/errorMiddleware");
 
 const port = process.env.PORT || 7003;
@@ -35,6 +36,7 @@ app.use(
 
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 app.use(errorHandler);
 
 app.listen(port, () => {
