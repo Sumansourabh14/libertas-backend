@@ -2,6 +2,8 @@ const asyncHandler = require("express-async-handler");
 const PostModel = require("../models/PostModel");
 const UserModel = require("../models/UserModel");
 const CommentModel = require("../models/CommentModel");
+const ReportPostModel = require("../models/ReportPostModel");
+const nodemailer = require("nodemailer");
 
 // @desc    create a post
 // @route   POST /api/user/create-post
@@ -461,6 +463,65 @@ const searchAllPosts = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    report a post
+// @route   POST /api/posts/report
+// @access  Private
+const reportPost = asyncHandler(async (req, res, next) => {
+  const { postId, reporterId, reason, comments } = req.body;
+
+  if (!postId || !reporterId || !reason) {
+    res.status(400);
+    return next(new Error("All fields are required"));
+  }
+
+  const newReport = await ReportPostModel.create({
+    reporterId,
+    postId,
+    reason,
+    comments,
+  });
+
+  if (newReport) {
+    // sending email with nodemailer
+    const html = `
+      <p>Hi,</p>
+      <p>Someone has reported a post on Libertas</p>
+      <h2>Details of the Report</h2>
+      <p>PostId: ${newReport.postId}</p>
+      <p>ReporterId: ${newReport.reporterId}</p>
+      <p>Reason: ${newReport.reason}</p>
+      <p>Comments: ${
+        !!newReport.comments ? newReport.comments : "No comments"
+      }</p>
+    `;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GOOGLE_ACCOUNT_USER,
+        pass: process.env.GOOGLE_ACCOUNT_PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
+      to: "sumsourabh14@gmail.com", // list of receivers
+      subject: "Alert! New Report on Libertas", // Subject line
+      html: html, // html body
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Your report has been succesfully sent to the admin",
+      newReport,
+      emailInfo: info,
+    });
+  } else {
+    res.status(400);
+    return next(new Error("Something went wrong while reporting this post"));
+  }
+});
+
 module.exports = {
   getPost,
   createPost,
@@ -476,4 +537,5 @@ module.exports = {
   getAllPosts,
   deleteAllPosts,
   searchAllPosts,
+  reportPost,
 };
