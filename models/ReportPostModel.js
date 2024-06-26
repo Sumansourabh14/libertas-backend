@@ -28,7 +28,7 @@ const reportPostSchema = mongoose.Schema(
     comments: {
       type: String,
     },
-    status: { type: String, default: "Pending" },
+    status: { type: String, default: "pending" },
   },
   {
     timestamps: true,
