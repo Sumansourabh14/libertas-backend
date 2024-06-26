@@ -522,6 +522,100 @@ const reportPost = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    get a reported post
+// @route   GET /api/posts/admin/report/:id
+// @access  Private
+const getReportedPost = asyncHandler(async (req, res, next) => {
+  const { reportId } = req.params;
+
+  if (!reportId) {
+    res.status(400);
+    return next(new Error("reportId field is required"));
+  }
+
+  const report = await ReportPostModel.findById(reportId)
+    .populate("postId reporterId")
+    .exec();
+
+  if (!report) {
+    res.status(404);
+    return next(new Error("Report not found"));
+  }
+
+  res.status(200).json({
+    success: true,
+    report,
+  });
+});
+
+// @desc    review a report and take action
+// @route   PUT /api/posts/admin/report/:id
+// @access  Private
+const reviewReportedPost = asyncHandler(async (req, res, next) => {
+  const { reportId } = req.params;
+  const { status, action } = req.body;
+
+  if (!reportId || !status || !action) {
+    res.status(400);
+    return next(new Error("All fields are required"));
+  }
+
+  const report = await ReportPostModel.findById(reportId)
+    .populate("postId reporterId")
+    .exec();
+
+  if (!report) {
+    res.status(404);
+    return next(new Error("Report not found"));
+  }
+
+  // Implement actions based on the status (e.g., remove post, ban user)
+  if (status === "approved" && action === "remove post") {
+    const removePost = await PostModel.findByIdAndRemove(report.postId._id);
+
+    if (!removePost) {
+      res.status(404);
+      return next(new Error("Post could not be removed"));
+    }
+
+    const updateReport = await ReportPostModel.updateOne(
+      { _id: reportId },
+      { $set: { status: status } }
+    );
+
+    if (updateReport) {
+      res.status(201).json({
+        success: true,
+        message: "This report request is approved and the post is removed",
+        status,
+        report: updateReport,
+      });
+    } else {
+      res.status(404);
+      return next(new Error("Report could not be updated"));
+    }
+  } else if (status === "rejected") {
+    const updateReport = await ReportPostModel.updateOne(
+      { _id: reportId },
+      { $set: { status: status } }
+    );
+
+    if (updateReport) {
+      res.status(200).json({
+        success: true,
+        message: "This report request is rejected",
+        status,
+        report: updateReport,
+      });
+    }
+  } else {
+    res.status(400);
+    return next(
+      new Error("The status or action did not match with libertas backend")
+    );
+  }
+});
+
 module.exports = {
   getPost,
   createPost,
@@ -538,4 +632,6 @@ module.exports = {
   deleteAllPosts,
   searchAllPosts,
   reportPost,
+  getReportedPost,
+  reviewReportedPost,
 };

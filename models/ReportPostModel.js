@@ -4,12 +4,12 @@ const reportPostSchema = mongoose.Schema(
   {
     reporterId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
+      ref: "post",
       required: true,
     },
     reason: {
@@ -28,7 +28,7 @@ const reportPostSchema = mongoose.Schema(
     comments: {
       type: String,
     },
-    status: { type: String, default: "Pending" },
+    status: { type: String, default: "pending" },
   },
   {
     timestamps: true,
