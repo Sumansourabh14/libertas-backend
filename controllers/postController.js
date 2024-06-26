@@ -522,6 +522,32 @@ const reportPost = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    get a reported post
+// @route   GET /api/posts/admin/report/:id
+// @access  Private
+const getReportedPost = asyncHandler(async (req, res, next) => {
+  const { reportId } = req.params;
+
+  if (!reportId) {
+    res.status(400);
+    return next(new Error("reportId field is required"));
+  }
+
+  const report = await ReportPostModel.findById(reportId)
+    .populate("postId reporterId")
+    .exec();
+
+  if (!report) {
+    res.status(404);
+    return next(new Error("Report not found"));
+  }
+
+  res.status(200).json({
+    success: true,
+    report,
+  });
+});
+
 module.exports = {
   getPost,
   createPost,
@@ -538,4 +564,5 @@ module.exports = {
   deleteAllPosts,
   searchAllPosts,
   reportPost,
+  getReportedPost,
 };

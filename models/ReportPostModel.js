@@ -4,12 +4,12 @@ const reportPostSchema = mongoose.Schema(
   {
     reporterId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
+      ref: "post",
       required: true,
     },
     reason: {
