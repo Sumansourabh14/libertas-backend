@@ -30,6 +30,10 @@ const userSchema = mongoose.Schema(
     twitter: {
       type: String,
     },
+    savedPosts: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,

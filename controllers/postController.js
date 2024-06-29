@@ -615,6 +615,54 @@ const reviewReportedPost = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    save a post
+// @route   PUT /api/posts/save/:id
+// @access  Private
+const savePost = asyncHandler(async (req, res, next) => {
+  const { postId } = req.body;
+
+  if (!postId) {
+    res.status(400);
+    return next(new Error("Post id is required"));
+  }
+
+  const post = await PostModel.findById(postId);
+
+  if (!post) {
+    res.status(404);
+    return next(new Error("Post not found"));
+  }
+
+  if (!req.user) {
+    res.status(400);
+    return next(new Error("User is not logged in"));
+  }
+
+  let updateUser;
+
+  if (!req.user.savedPosts.includes(postId)) {
+    updateUser = await UserModel.updateOne(
+      { _id: req.user._id },
+      { $push: { savedPosts: postId } }
+    );
+  } else {
+    updateUser = await UserModel.updateOne(
+      { _id: req.user._id },
+      { $pull: { savedPosts: postId } }
+    );
+  }
+
+  if (!updateUser) {
+    res.status(500);
+    return next(new Error("There was an issue while saving the post"));
+  }
+
+  res.status(200).json({
+    success: true,
+    updateUser,
+  });
+});
+
 module.exports = {
   getPost,
   createPost,
@@ -633,4 +681,5 @@ module.exports = {
   reportPost,
   getReportedPost,
   reviewReportedPost,
+  savePost,
 };
