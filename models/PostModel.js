@@ -33,6 +33,10 @@ const postSchema = mongoose.Schema(
       type: Array,
       default: [],
     },
+    reportedByUsers: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,
