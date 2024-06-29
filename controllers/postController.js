@@ -462,51 +462,62 @@ const reportPost = asyncHandler(async (req, res, next) => {
     return next(new Error("All fields are required"));
   }
 
-  const newReport = await ReportPostModel.create({
-    reporterId,
-    postId,
-    reason,
-    comments,
-  });
+  const post = await PostModel.findById(postId);
 
-  if (newReport) {
-    // sending email with nodemailer
-    const html = `
-      <p>Hi,</p>
-      <p>Someone has reported a post on Libertas</p>
-      <h2>Details of the Report</h2>
-      <p>PostId: ${newReport.postId}</p>
-      <p>ReporterId: ${newReport.reporterId}</p>
-      <p>Reason: ${newReport.reason}</p>
-      <p>Comments: ${
-        !!newReport.comments ? newReport.comments : "No comments"
-      }</p>
-    `;
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GOOGLE_ACCOUNT_USER,
-        pass: process.env.GOOGLE_ACCOUNT_PASS,
-      },
+  if (!post.reportedByUsers.includes(reporterId)) {
+    const newReport = await ReportPostModel.create({
+      reporterId,
+      postId,
+      reason,
+      comments,
     });
 
-    const info = await transporter.sendMail({
-      from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
-      to: "sumsourabh14@gmail.com", // list of receivers
-      subject: "Alert! New Report on Libertas", // Subject line
-      html: html, // html body
-    });
+    if (newReport) {
+      await PostModel.updateOne(
+        { _id: postId },
+        { $push: { reportedByUsers: reporterId } }
+      );
 
-    res.status(201).json({
-      success: true,
-      message: "Your report has been succesfully sent to the admin",
-      newReport,
-      emailInfo: info,
-    });
+      // sending email with nodemailer
+      const html = `
+        <p>Hi,</p>
+        <p>Someone has reported a post on Libertas</p>
+        <h2>Details of the Report</h2>
+        <p>PostId: ${newReport.postId}</p>
+        <p>ReporterId: ${newReport.reporterId}</p>
+        <p>Reason: ${newReport.reason}</p>
+        <p>Comments: ${
+          !!newReport.comments ? newReport.comments : "No comments"
+        }</p>
+      `;
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.GOOGLE_ACCOUNT_USER,
+          pass: process.env.GOOGLE_ACCOUNT_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"Libertas" <libertas.discussion@gmail.com>', // sender address
+        to: "sumsourabh14@gmail.com", // list of receivers
+        subject: "Alert! New Report on Libertas", // Subject line
+        html: html, // html body
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Your report has been succesfully sent to the admin",
+        newReport,
+      });
+    } else {
+      res.status(400);
+      return next(new Error("Something went wrong while reporting this post"));
+    }
   } else {
     res.status(400);
-    return next(new Error("Something went wrong while reporting this post"));
+    return next(new Error("You have already reported this post"));
   }
 });
 
