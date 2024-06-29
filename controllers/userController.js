@@ -226,7 +226,6 @@ const getUser = asyncHandler(async (req, res, next) => {
 
 const getUserByEmailOrUsername = asyncHandler(async (req, res, next) => {
   const { emailOrUsername } = req.params;
-  console.log("emailOrUsername: ", emailOrUsername);
 
   if (!emailOrUsername) {
     res.status(400);
@@ -254,7 +253,6 @@ const getUserByEmailOrUsername = asyncHandler(async (req, res, next) => {
 
 const updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  console.log("req.body -------------------", req.body);
 
   const { bio, twitter, website, avatar } = req.body;
 

@@ -103,7 +103,6 @@ const upvotePost = asyncHandler(async (req, res, next) => {
 
   // Fetch the updated post after the upvote
   const updatedPost = await PostModel.findById(id);
-  console.log(updatedPost);
 
   res.status(200).json({
     success: true,
@@ -132,7 +131,6 @@ const downvotePost = asyncHandler(async (req, res, next) => {
       { $push: { downvotes: req.user._id } }
     );
   } else {
-    console.log("post after downvote", post);
     // remove the downvote
     await PostModel.updateOne(
       { _id: id },
@@ -149,7 +147,6 @@ const downvotePost = asyncHandler(async (req, res, next) => {
 
   // Fetch the updated post after the downvote
   const updatedPost = await PostModel.findById(id);
-  console.log("updatedPost ---------", updatedPost);
 
   res.status(200).json({
     success: true,
@@ -249,7 +246,6 @@ const deleteComment = asyncHandler(async (req, res, next) => {
   );
 
   const updatedPost = await PostModel.findById(postId);
-  console.log("updatedPost -------------", updatedPost);
 
   res.status(200).json({
     success: true,
@@ -302,7 +298,6 @@ const upvoteComment = asyncHandler(async (req, res, next) => {
 
   // Fetch the updated comment after the upvote
   const updatedComment = await CommentModel.findById(commentId);
-  console.log("updatedComment ------------------------", updatedComment);
 
   res.status(200).json({
     success: true,
@@ -319,7 +314,6 @@ const getPosts = asyncHandler(async (req, res, next) => {
 
   // check if user is present in the database
   const user = await UserModel.findById(id);
-  console.log(user);
 
   if (!user) {
     res.status(400);
@@ -329,8 +323,6 @@ const getPosts = asyncHandler(async (req, res, next) => {
   // find all the posts created by the user
   const posts = await PostModel.find({ author: user });
   // const posts = await PostModel.find({ userId: id });
-
-  console.log(posts);
 
   res.status(200).json({
     success: true,
@@ -393,8 +385,6 @@ const deletePost = asyncHandler(async (req, res, next) => {
   // find all the posts created by the user
   const deletePost = await PostModel.findByIdAndRemove(id);
 
-  console.log(deletePost);
-
   res.status(200).json({
     success: true,
     id,
@@ -418,8 +408,6 @@ const deleteAllPosts = asyncHandler(async (req, res, next) => {
 
   // find all the posts created by the user
   const deletePosts = await PostModel.deleteMany({ userId: id });
-
-  console.log(deletePosts);
 
   res.status(200).json({
     success: true,
