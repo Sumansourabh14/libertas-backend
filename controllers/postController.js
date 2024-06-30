@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 // @route   POST /api/user/create-post
 // @access  Private
 const createPost = asyncHandler(async (req, res, next) => {
-  const { title, body, imageUrl } = req.body;
+  const { title, body, imageUrl, videoUrl } = req.body;
 
   if (!title) {
     res.status(400);
@@ -21,6 +21,7 @@ const createPost = asyncHandler(async (req, res, next) => {
       title,
       body,
       imageUrl,
+      videoUrl,
     },
     upvotes: [],
     downvotes: [],
