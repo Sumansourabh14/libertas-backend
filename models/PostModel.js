@@ -17,6 +17,9 @@ const postSchema = mongoose.Schema(
       imageUrl: {
         type: String,
       },
+      videoUrl: {
+        type: String,
+      },
     },
     // need to create comments schema in order to remove any comment
     comments: [
