@@ -70,6 +70,44 @@ const updatePost = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    quote a post (repost type)
+// @route   POST /api/posts/quote-post
+// @access  Private
+const quotePost = asyncHandler(async (req, res, next) => {
+  const { title, body, imageUrl, videoUrl, quotedPostId } = req.body;
+
+  if (!title) {
+    res.status(400);
+    return next(new Error("Please write title"));
+  }
+
+  const quotedPost = await PostModel.findById(quotedPostId);
+
+  if (!quotedPost) {
+    res.status(404);
+    return next(new Error("Post not found"));
+  }
+
+  const newPost = await PostModel.create({
+    post: {
+      title,
+      body,
+      imageUrl,
+      videoUrl,
+    },
+    quotedPost: quotedPost,
+    upvotes: [],
+    downvotes: [],
+    author: req.user,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Successfully quoted the post",
+    newPost,
+  });
+});
+
 // @desc    upvote a post
 // @route   POST /api/post/upvote/:id
 // @access  Private
@@ -668,6 +706,7 @@ module.exports = {
   getPost,
   createPost,
   updatePost,
+  quotePost,
   deletePost,
   upvotePost,
   addComment,

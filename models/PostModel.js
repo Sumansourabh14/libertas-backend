@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const postSchema = mongoose.Schema(
   {
     author: {
-      // type: mongoose.Schema.Types.ObjectId,
       type: Object,
     },
     post: {
@@ -20,6 +19,11 @@ const postSchema = mongoose.Schema(
       videoUrl: {
         type: String,
       },
+    },
+    quotedPost: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      default: null,
     },
     // need to create comments schema in order to remove any comment
     comments: [
